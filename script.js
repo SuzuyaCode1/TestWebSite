@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+const SHEET_URL = 'https://api.sheetbest.com/sheets/9fbcc35b-f3a3-4e35-bd38-d699a549bb42';
+
 const roomData = {
     standard: {
         title: 'Стандартний номер',
@@ -326,64 +328,53 @@ function removeFieldError(field) {
     }
 }
 
-function handleFormSubmit(event) {
+async function handleFormSubmit(event) {
     event.preventDefault();
-    
-    // Получаем все поля формы
     const form = event.target;
     const requiredFields = form.querySelectorAll('[required]');
     let isValid = true;
-    
-    // Валидируем все обязательные поля
+
+    // Проверка обязательных полей
     requiredFields.forEach(field => {
         if (!field.value.trim()) {
-            addFieldError(field, 'Это поле обязательно');
             isValid = false;
-        } else {
-            validateField({ target: field });
         }
     });
 
-    const notesField = form.querySelector('#notes');
-    if (notesField) {
-        validateNotes(notesField);
-    }
-    
-    // Проверяем наличие ошибок
-    const errorFields = form.querySelectorAll('.field-error');
-    if (errorFields.length > 0) {
-        isValid = false;
-    }
-    
     if (isValid) {
-        // Собираем данные бронирования
-            // Знаходимо обраний тип номера
-            const roomType = form.querySelector('#roomType').value;
+        const roomType = form.querySelector('#roomType').value;
 
-            const bookingData = {
-                checkIn: form.querySelector('#checkIn').value,
-                checkOut: form.querySelector('#checkOut').value,
-                roomType: roomType,
-                // ДОДАЙ ЦЕЙ РЯДОК:
-                priceAtBooking: roomPrices[roomType], 
-                guests: form.querySelector('#guests').value,
-                name: form.querySelector('#name').value,
-                email: form.querySelector('#email').value,
-                phone: form.querySelector('#phone').value,
-                notes: form.querySelector('#notes').value.trim()
-            };  
-        
+        const bookingData = {
+            name: form.querySelector('#name').value,
+            email: form.querySelector('#email').value,
+            phone: form.querySelector('#phone').value,
+            roomType: roomType,
+            checkIn: form.querySelector('#checkIn').value,
+            checkOut: form.querySelector('#checkOut').value,
+            guests: form.querySelector('#guests').value,
+            notes: form.querySelector('#notes').value.trim(),
+            priceAtBooking: roomPrices[roomType] || 1000 // сохраняем цену
+        };
+
+        // 1. Сохраняем локально для старой системы
         saveBookingOrder(bookingData);
-        
-        // Показываем модальное окно с подтверждением
+
+        // 2. Отправляем в Google Таблицу (синхронизация)
+        try {
+            await fetch(SHEET_URL, {
+                method: 'POST',
+                mode: 'cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bookingData)
+            });
+            console.log('Успешно отправлено в таблицу');
+        } catch (error) {
+            console.error('Ошибка отправки в таблицу:', error);
+        }
+
         showBookingConfirmation(bookingData);
-        
-        // Очищаем форму
         form.reset();
-        updateNotesCounter('');
-        
-        // Удаляем все ошибки
-        form.querySelectorAll('.field-error').forEach(error => error.remove());
+        if(typeof updateNotesCounter === 'function') updateNotesCounter('');
     }
 }
 
@@ -760,11 +751,21 @@ function showAdminDashboard() {
     renderNewBookingsList();
 }
 
-function loadOrders() {
+async function loadOrders() {
     try {
-        return JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY)) || [];
+        // 1. Робимо запит до твоєї таблиці
+        const response = await fetch(SHEET_URL);
+        const data = await response.json();
+        
+        // 2. Зберігаємо в localStorage, щоб адмінка не гальмувала
+        localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(data));
+        
+        // 3. Повертаємо отримані дані
+        return data;
     } catch (e) {
-        return [];
+        // Якщо інтернет зник, беремо старі дані, які вже були в пам'яті
+        console.error('Помилка завантаження з таблиці:', e);
+        return JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY)) || [];
     }
 }
 
