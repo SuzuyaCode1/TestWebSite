@@ -2,8 +2,6 @@
 // ИНИЦИАЛИЗАЦИЯ И СОБЫТИЯ ЗАГРУЗКИ
 // ===========================
 
-const SHEET_URL = 'https://api.sheetbest.com/sheets/9fbcc35b-f3a3-4e35-bd38-d699a549bb42';
-
 document.addEventListener('DOMContentLoaded', function() {
     initializeObserver();
     initializeForm();
@@ -328,53 +326,64 @@ function removeFieldError(field) {
     }
 }
 
-async function handleFormSubmit(event) {
+function handleFormSubmit(event) {
     event.preventDefault();
+    
+    // Получаем все поля формы
     const form = event.target;
     const requiredFields = form.querySelectorAll('[required]');
     let isValid = true;
-
-    // Проверка обязательных полей
+    
+    // Валидируем все обязательные поля
     requiredFields.forEach(field => {
         if (!field.value.trim()) {
+            addFieldError(field, 'Это поле обязательно');
             isValid = false;
+        } else {
+            validateField({ target: field });
         }
     });
 
+    const notesField = form.querySelector('#notes');
+    if (notesField) {
+        validateNotes(notesField);
+    }
+    
+    // Проверяем наличие ошибок
+    const errorFields = form.querySelectorAll('.field-error');
+    if (errorFields.length > 0) {
+        isValid = false;
+    }
+    
     if (isValid) {
-        const roomType = form.querySelector('#roomType').value;
+        // Собираем данные бронирования
+            // Знаходимо обраний тип номера
+            const roomType = form.querySelector('#roomType').value;
 
-        const bookingData = {
-            name: form.querySelector('#name').value,
-            email: form.querySelector('#email').value,
-            phone: form.querySelector('#phone').value,
-            roomType: roomType,
-            checkIn: form.querySelector('#checkIn').value,
-            checkOut: form.querySelector('#checkOut').value,
-            guests: form.querySelector('#guests').value,
-            notes: form.querySelector('#notes').value.trim(),
-            priceAtBooking: roomPrices[roomType] || 1000 // сохраняем цену
-        };
-
-        // 1. Сохраняем локально для старой системы
+            const bookingData = {
+                checkIn: form.querySelector('#checkIn').value,
+                checkOut: form.querySelector('#checkOut').value,
+                roomType: roomType,
+                // ДОДАЙ ЦЕЙ РЯДОК:
+                priceAtBooking: roomPrices[roomType], 
+                guests: form.querySelector('#guests').value,
+                name: form.querySelector('#name').value,
+                email: form.querySelector('#email').value,
+                phone: form.querySelector('#phone').value,
+                notes: form.querySelector('#notes').value.trim()
+            };  
+        
         saveBookingOrder(bookingData);
-
-        // 2. Отправляем в Google Таблицу (синхронизация)
-        try {
-            await fetch(SHEET_URL, {
-                method: 'POST',
-                mode: 'cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(bookingData)
-            });
-            console.log('Успешно отправлено в таблицу');
-        } catch (error) {
-            console.error('Ошибка отправки в таблицу:', error);
-        }
-
+        
+        // Показываем модальное окно с подтверждением
         showBookingConfirmation(bookingData);
+        
+        // Очищаем форму
         form.reset();
-        if(typeof updateNotesCounter === 'function') updateNotesCounter('');
+        updateNotesCounter('');
+        
+        // Удаляем все ошибки
+        form.querySelectorAll('.field-error').forEach(error => error.remove());
     }
 }
 
@@ -751,21 +760,11 @@ function showAdminDashboard() {
     renderNewBookingsList();
 }
 
-async function loadOrders() {
+function loadOrders() {
     try {
-        // 1. Робимо запит до твоєї таблиці
-        const response = await fetch(SHEET_URL);
-        const data = await response.json();
-        
-        // 2. Зберігаємо в localStorage, щоб адмінка не гальмувала
-        localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(data));
-        
-        // 3. Повертаємо отримані дані
-        return data;
-    } catch (e) {
-        // Якщо інтернет зник, беремо старі дані, які вже були в пам'яті
-        console.error('Помилка завантаження з таблиці:', e);
         return JSON.parse(localStorage.getItem(ORDERS_STORAGE_KEY)) || [];
+    } catch (e) {
+        return [];
     }
 }
 
@@ -787,10 +786,7 @@ function renderAdminSummary() {
     const orders = loadOrders();
     const summaryElement = document.getElementById('adminSummary');
     const totalRevenue = orders.reduce((total, order) => {
-    // Беремо ціну, яка була під час бронювання (priceAtBooking)
-    // Якщо її немає (старі записи), беремо поточну (roomPrices[order.roomType])
-    const price = order.priceAtBooking || roomPrices[order.roomType] || 0;
-    return total + price;
+        return total + (roomPrices[order.roomType] || 0);
     }, 0);
 
     if (!summaryElement) return;
@@ -1286,31 +1282,5 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
-
-// Функція для завантаження замовлень з Google Таблиці
-async function initAdmin() {
-    try {
-        const response = await fetch(SHEET_URL);
-        const data = await response.json();
-        
-        // Зберігаємо в локальну пам'ять для швидкості
-        localStorage.setItem('orders', JSON.stringify(data));
-        
-        // Викликаємо функцію, яка у тебе вже малює таблицю (назви можуть відрізнятися)
-        if (typeof renderAdminTable === 'function') {
-            renderAdminTable(data);
-        }
-    } catch (error) {
-        console.error('Помилка завантаження бази:', error);
-    }
-}
-
-// Пошукай, де у тебе функція initializeAdminPage і додай в неї initAdmin()
-// Вона має виглядати ось так:
-function initializeAdminPage() {
-    if (document.body.classList.contains('admin-page')) {
-        initAdmin();
-    }
-}
 
 console.log('✓ Сайт готелю завантажен і готовий до використання');
