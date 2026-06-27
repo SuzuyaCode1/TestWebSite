@@ -357,7 +357,7 @@ function handleFormSubmit(event) {
     
     if (isValid) {
         // Собираем данные бронирования
-            // Знаходимо обраний тип номера
+        // Знаходимо обраний тип номера
             const roomType = form.querySelector('#roomType').value;
 
             const bookingData = {
