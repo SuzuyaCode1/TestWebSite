@@ -2,6 +2,8 @@
 // ИНИЦИАЛИЗАЦИЯ И СОБЫТИЯ ЗАГРУЗКИ
 // ===========================
 
+const SHEET_URL = 'https://api.sheetbest.com/sheets/9fbcc35b-f3a3-4e35-bd38-d699a549bb42';
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeObserver();
     initializeForm();
@@ -23,8 +25,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // ignore
     }
 });
-
-const SHEET_URL = 'https://api.sheetbest.com/sheets/9fbcc35b-f3a3-4e35-bd38-d699a549bb42';
 
 const roomData = {
     standard: {
@@ -1286,5 +1286,31 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
+
+// Функція для завантаження замовлень з Google Таблиці
+async function initAdmin() {
+    try {
+        const response = await fetch(SHEET_URL);
+        const data = await response.json();
+        
+        // Зберігаємо в локальну пам'ять для швидкості
+        localStorage.setItem('orders', JSON.stringify(data));
+        
+        // Викликаємо функцію, яка у тебе вже малює таблицю (назви можуть відрізнятися)
+        if (typeof renderAdminTable === 'function') {
+            renderAdminTable(data);
+        }
+    } catch (error) {
+        console.error('Помилка завантаження бази:', error);
+    }
+}
+
+// Пошукай, де у тебе функція initializeAdminPage і додай в неї initAdmin()
+// Вона має виглядати ось так:
+function initializeAdminPage() {
+    if (document.body.classList.contains('admin-page')) {
+        initAdmin();
+    }
+}
 
 console.log('✓ Сайт готелю завантажен і готовий до використання');
