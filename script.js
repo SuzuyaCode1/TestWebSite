@@ -357,16 +357,21 @@ function handleFormSubmit(event) {
     
     if (isValid) {
         // Собираем данные бронирования
-        const bookingData = {
-            checkIn: form.querySelector('#checkIn').value,
-            checkOut: form.querySelector('#checkOut').value,
-            roomType: form.querySelector('#roomType').value,
-            guests: form.querySelector('#guests').value,
-            name: form.querySelector('#name').value,
-            email: form.querySelector('#email').value,
-            phone: form.querySelector('#phone').value,
-            notes: form.querySelector('#notes').value.trim()
-        };
+            // Знаходимо обраний тип номера
+            const roomType = form.querySelector('#roomType').value;
+
+            const bookingData = {
+                checkIn: form.querySelector('#checkIn').value,
+                checkOut: form.querySelector('#checkOut').value,
+                roomType: roomType,
+                // ДОДАЙ ЦЕЙ РЯДОК:
+                priceAtBooking: roomPrices[roomType], 
+                guests: form.querySelector('#guests').value,
+                name: form.querySelector('#name').value,
+                email: form.querySelector('#email').value,
+                phone: form.querySelector('#phone').value,
+                notes: form.querySelector('#notes').value.trim()
+            };  
         
         saveBookingOrder(bookingData);
         
@@ -781,7 +786,10 @@ function renderAdminSummary() {
     const orders = loadOrders();
     const summaryElement = document.getElementById('adminSummary');
     const totalRevenue = orders.reduce((total, order) => {
-        return total + (roomPrices[order.roomType] || 0);
+    // Беремо ціну, яка була під час бронювання (priceAtBooking)
+    // Якщо її немає (старі записи), беремо поточну (roomPrices[order.roomType])
+    const price = order.priceAtBooking || roomPrices[order.roomType] || 0;
+    return total + price;
     }, 0);
 
     if (!summaryElement) return;
