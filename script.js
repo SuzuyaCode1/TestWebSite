@@ -69,17 +69,6 @@ const roomData = {
             'https://picsum.photos/seed/family-room-2/800/500'
         ]
     },
-    test: {
-        title: 'Тест номер',
-        price: '2500₴ / ніч',
-        description: 'Тестовий номер для перевірки послуг.',
-        highlights: ['2 спальня', 'Вітальня', 'Дитяча зона', 'Кухонний куточок'],
-        amenities: ['Кухня', 'Дитячий стіл', 'Крісло для годування', 'Тихий простір', 'Безкоштовний паркінг'],
-        gallery: [
-            'https://picsum.photos/seed/family-room-1/800/500',
-            'https://picsum.photos/seed/family-room-2/800/500'
-        ]
-    }
 };
  
 const ADMIN_USERNAME = 'admin';
@@ -97,7 +86,6 @@ let roomPrices = {
     comfort: 1500,
     luxury: 2500,
     family: 2000,
-    test: 3500
 };
 let lastConfirmedBooking = null;
 
@@ -472,7 +460,6 @@ function showBookingConfirmation(bookingData) {
         'comfort': 'Комфорт',
         'luxury': 'Люкс',
         'family': 'Сімейний',
-        'test': 'Тест'
     };
     
     // Заповнюємо деталі бронювання
@@ -686,7 +673,6 @@ function initializeAdminPriceEditor() {
     const priceStandard = document.getElementById('priceStandard');
     const priceComfort = document.getElementById('priceComfort');
     const priceLuxury = document.getElementById('priceLuxury');
-    const priceTest = document.getElementById('priceTest');
     const priceFamily = document.getElementById('priceFamily');
     const saveBtn = document.getElementById('savePricesBtn');
     const resetBtn = document.getElementById('resetPricesBtn');
@@ -697,7 +683,6 @@ function initializeAdminPriceEditor() {
     priceStandard.value = current.standard;
     priceComfort.value = current.comfort;
     priceLuxury.value = current.luxury;
-    priceTest.value = current.test;
     priceFamily.value = current.family;
 
     saveBtn.addEventListener('click', () => {
@@ -705,7 +690,6 @@ function initializeAdminPriceEditor() {
             standard: Math.max(0, Number(priceStandard.value) || 0),
             comfort: Math.max(0, Number(priceComfort.value) || 0),
             luxury: Math.max(0, Number(priceLuxury.value) || 0),
-            test: Math.max(0, Number(priceTest.value) || 0),
             family: Math.max(0, Number(priceFamily.value) || 0)
         };
         roomPrices = newPrices;
@@ -717,13 +701,12 @@ function initializeAdminPriceEditor() {
 
     resetBtn.addEventListener('click', () => {
         if (!confirm('Скинути ціни до стандартних значень?')) return;
-        roomPrices = { standard:1000, comfort:1500, luxury:2500, family:2000, test:3500 };
+        roomPrices = { standard:1000, comfort:1500, luxury:2500, family:2000};
         saveRoomPrices(roomPrices);
         priceStandard.value = roomPrices.standard;
         priceComfort.value = roomPrices.comfort;
         priceLuxury.value = roomPrices.luxury;
         priceFamily.value = roomPrices.family;
-        priceTest.value = roomPrices.test;
         applyRoomPricesToDOM(roomPrices);
         renderAdminSummary();
         alert('Ціни скинуто');
