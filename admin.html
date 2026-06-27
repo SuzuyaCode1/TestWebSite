@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Панель управления</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="admin-page">
+    <div class="admin-container">
+        <div id="adminLogin" class="admin-card">
+            <h1>Вхід в адмін-панель</h1>
+            <form id="adminLoginForm">
+                <label for="adminUsername">Ім'я користувача</label>
+                <input type="text" id="adminUsername" name="adminUsername" placeholder="Введіть логін" required>
+
+                <label for="adminPassword">Пароль</label>
+                <input type="password" id="adminPassword" name="adminPassword" placeholder="Введіть пароль" required>
+
+                <button type="submit" class="btn btn-primary btn-large">Войти</button>
+                <a href="index.html" class="btn btn-secondary">На сайт</a>
+            </form>
+        </div>
+
+        <div id="adminDashboard" class="admin-dashboard hidden">
+            <div class="admin-dashboard-header">
+                <h1>Панель заказов</h1>
+                <div>
+                    <button class="btn btn-secondary" id="clearOrdersBtn" type="button">Очистить заказы</button>
+                    <button class="btn btn-primary" id="adminLogoutBtn" type="button">Выйти</button>
+                </div>
+            </div>
+
+            <div id="adminSummary" class="admin-summary"></div>
+
+            <div class="admin-card" style="margin-top:22px;">
+                <h2>Редагувати ціни номерів</h2>
+                <form id="priceEditorForm">
+                    <label for="priceStandard">Стандартний (₴)</label>
+                    <input id="priceStandard" type="number" min="0" />
+
+                    <label for="priceComfort">Комфорт (₴)</label>
+                    <input id="priceComfort" type="number" min="0" />
+
+                    <label for="priceLuxury">Люкс (₴)</label>
+                    <input id="priceLuxury" type="number" min="0" />
+
+                    <label for="priceTest">Тест (₴)</label>
+                    <input id="priceTest" type="number" min="0" />
+
+                    <label for="priceFamily">Сімейний (₴)</label>
+                    <input id="priceFamily" type="number" min="0" />
+
+                    <div style="display:flex;gap:10px;align-items:center;margin-top:12px;">
+                        <button id="savePricesBtn" class="btn btn-primary" type="button">Зберегти ціни</button>
+                        <button id="resetPricesBtn" class="btn btn-secondary" type="button">Скинути до стандарту</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="admin-card" id="newBookingsCard" style="margin-top:22px;">
+                <h2>Нові бронювання</h2>
+                <ul id="newBookingsList" style="list-style:none;padding:0;margin:0;max-height:220px;overflow:auto;display:flex;flex-direction:column;gap:8px;"></ul>
+            </div>
+
+            <div class="admin-table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Заезд</th>
+                            <th>Выезд</th>
+                            <th>Номер</th>
+                            <th>Гостей</th>
+                            <th>Имя</th>
+                            <th>Email</th>
+                            <th>Телефон</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminOrdersTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Order Detail Modal -->
+    <div id="adminOrderModal" class="modal">
+        <div class="modal-content" style="max-width:900px; width:95%; padding:20px 30px;">
+            <div class="modal-close">&times;</div>
+            <div id="adminOrderDetail" style="display:flex;gap:20px;align-items:flex-start;">
+                <div id="adminOrderDetailLeft" style="flex:1;min-width:280px;">
+                    <h2 id="detailRoomTitle"></h2>
+                    <div id="detailGallery" style="display:flex;flex-direction:column;gap:12px;"></div>
+                </div>
+                <div id="adminOrderDetailRight" style="flex:1;min-width:320px;">
+                    <h3>Інформація про бронювання</h3>
+                    <div id="detailFields" style="display:flex;flex-direction:column;gap:10px;margin-top:10px;"></div>
+                    <div style="display:flex;gap:10px;margin-top:18px;">
+                        <select id="detailStatus" style="padding:8px;">
+                            <option value="new">Нове</option>
+                            <option value="confirmed">Підтверджено</option>
+                            <option value="cancelled">Скасовано</option>
+                        </select>
+                        <button id="detailSaveBtn" class="btn btn-primary">Зберегти</button>
+                        <button id="detailDeleteBtn" class="btn admin-delete-btn">Видалити</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

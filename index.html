@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Козацька Застава - Комфорт та гостинність</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-content">
+                <div class="logo">
+                    <span class="material-icons logo-icon">home</span>
+                    <span class="logo-text">Козацька Застава</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#hero">Головна</a></li>
+                    <li><a href="#about">Про нас</a></li>
+                    <li><a href="#rooms">Номери</a></li>
+                    <li><a href="#services">Послуги</a></li>
+                    <li><a href="#booking">Бронювання</a></li>
+                    <li><a href="#contacts">Контакти</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Ласкаво просимо до Козацької Застави</h1>
+            <p class="hero-subtitle">Ваш ідеальний відпочинок починається тут. Розкіш, комфорт і гостинність в одному місці.</p>
+            <a href="#booking" class="btn btn-primary btn-large">Забронювати зараз</a>
+        </div>
+        <div class="hero-overlay"></div>
+        <img src="https://picsum.photos/seed/hotelhero/1920/1080" alt="Отель" class="hero-image">
+    </section>
+
+    <!-- О нас -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="section-header">
+                <h2>Про наш готель</h2>
+                <div class="decorative-line"></div>
+            </div>
+            <div class="about-content fade-in">
+                <div class="about-text">
+                    <p>Ласкаво просимо до Козацької Застави – місця, де кожен гість знаходить ідеальний баланс між комфортом та благоустроєм. Наш готель пропонує високий рівень обслуговування, сучасні номери та набір послуг, розроблених спеціально для вашої зручності.</p>
+                    <p>Ми спеціалізуємося на повноцінному відпочинку для мандрівників, сімей та бізнесменів. Наша команда завжди готова забезпечити вам незабутній досвід перебування.</p>
+                    <div class="about-stats">
+                        <div class="stat">
+                            <span class="stat-number">150+</span>
+                            <span class="stat-label">Номерів</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">15+</span>
+                            <span class="stat-label">Років досвіду</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">5000+</span>
+                            <span class="stat-label">Задоволених гостей</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Номера для бронювання -->
+    <section id="rooms" class="rooms">
+        <div class="container">
+            <div class="section-header">
+                <h2>Наші номери</h2>
+                <div class="decorative-line"></div>
+            </div>
+            <div class="rooms-grid">
+                <!-- Стандартний номер -->
+                <div class="room-card fade-in" data-room="standard" tabindex="0" role="button" aria-label="Детальніше про Стандартний номер">
+                    <div class="room-image">
+                        <img src="https://picsum.photos/seed/standard/800/600" alt="Стандартний номер">
+                        <div class="room-overlay"></div>
+                    </div>
+                    <div class="room-info">
+                        <h3>Стандартний</h3>
+                        <p class="room-price" data-price-key="standard"><span class="price-value">1000</span>₴ <span>/ніч</span></p>
+                        <ul class="room-features">
+                            <li>2 односпальні ліжка</li>
+                            <li>Ванна кімната</li>
+                            <li>Кондиціонер</li>
+                            <li>WiFi</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Комфорт номер -->
+                <div class="room-card fade-in" data-room="comfort" tabindex="0" role="button" aria-label="Детальніше про Комфорт номер">
+                    <div class="room-image">
+                        <img src="https://picsum.photos/seed/comfort/800/600" alt="Номер Комфорт">
+                        <div class="room-overlay"></div>
+                    </div>
+                    <div class="room-info">
+                        <h3>Комфорт</h3>
+                        <p class="room-price" data-price-key="comfort"><span class="price-value">1500</span>₴ <span>/ніч</span></p>
+                        <ul class="room-features">
+                            <li>Двоспальне ліжко</li>
+                            <li>Гідромасаж</li>
+                            <li>Міні-бар</li>
+                            <li>Балкон</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Люкс номер -->
+                <div class="room-card fade-in" data-room="luxury" tabindex="0" role="button" aria-label="Детальніше про Люкс номер">
+                    <div class="room-image">
+                        <img src="https://picsum.photos/seed/luxury/800/600" alt="Люкс номер">
+                        <div class="room-overlay"></div>
+                    </div>
+                    <div class="room-info">
+                        <h3>Люкс</h3>
+                        <p class="room-price" data-price-key="luxury"><span class="price-value">2500</span>₴ <span>/ніч</span></p>
+                        <ul class="room-features">
+                            <li>Розкішний набір послуг</li>
+                            <li>VIP ванна</li>
+                            <li>Робочий кабінет</li>
+                            <li>Окремий вхід</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- test номер -->
+                <div class="room-card fade-in" data-room="test" tabindex="0" role="button" aria-label="Детальніше про Test номер">
+                    <div class="room-image">
+                        <img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/30/b0/1b/8e/caption.jpg?w=1200&h=-1&s=1" alt="Test номер">
+                        <div class="room-overlay"></div>
+                    </div>
+                    <div class="room-info">
+                        <h3>Тест</h3>
+                        <p class="room-price" data-price-key="test"><span class="price-value">2500</span>₴ <span>/ніч</span></p>
+                        <ul class="room-features">
+                            <li>Розкішний набір послуг</li>
+                            <li>VIP ванна</li>
+                            <li>Робочий кабінет</li>
+                            <li>Окремий вхід</li>
+                        </ul>
+                    </div>
+                </div>
+
+
+                <!-- Сімейний номер -->
+                <div class="room-card fade-in" data-room="family" tabindex="0" role="button" aria-label="Детальніше про Сімейний номер">
+                    <div class="room-image">
+                        <img src="https://picsum.photos/seed/family/800/600" alt="Сімейний номер">
+                        <div class="room-overlay"></div>
+                    </div>
+                    <div class="room-info">
+                        <h3>Сімейний</h3>
+                        <p class="room-price" data-price-key="family"><span class="price-value">2000</span>₴ <span>/ніч</span></p>
+                        <ul class="room-features">
+                            <li>2 спальні кімнати</li>
+                            <li>Вітальня</li>
+                            <li>Кухня</li>
+                            <li>Детська зона</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Послуги -->
+    <section id="services" class="services">
+        <div class="container">
+            <div class="section-header">
+                <h2>Наші послуги</h2>
+                <div class="decorative-line"></div>
+            </div>
+            <div class="services-grid">
+                <!-- Карточка: Проживание -->
+                <div class="service-card fade-in">
+                    <div class="service-icon material-icons">bed</div>
+                    <h3>Проживання в номерах</h3>
+                    <p>Просторні та комфортні номери з сучасним обладнанням, кондиціонером, телевізором та безкоштовним WiFi. Вибір номерів від економ до люкс-класу.</p>
+                    <ul class="service-features">
+                        <li>✓ Класичні номери</li>
+                        <li>✓ Люкс номери</li>
+                        <li>✓ Сімейні апартаменти</li>
+                        <li>✓ Безкоштовний WiFi</li>
+                    </ul>
+                </div>
+
+                <!-- Карточка: Баня -->
+                <div class="service-card fade-in">
+                    <div class="service-icon material-icons">spa</div>
+                    <h3>Баня та спа</h3>
+                    <p>Розслаблюючі процедури в нашій сучасній парній. Високий рівень вологості, облаштування банними приналежностями та професійний догляд.</p>
+                    <ul class="service-features">
+                        <li>✓ Міні-бар</li>
+                        <li>✓ Фінська сауна</li>
+                        <li>✓ Спа-процедури</li>
+                        <li>✓ Масажні послуги</li>
+                    </ul>
+                </div>
+
+                <!-- Карточка: Парковка TIR -->
+                <div class="service-card fade-in">
+                    <div class="service-icon material-icons">local_shipping</div>
+                    <h3>Парковка TIR</h3>
+                    <p>Безпечна охоронювана стоянка для вантажівок та фур. Цілодобове відеостеження, освітлення та професійна охорона територію.</p>
+                    <ul class="service-features">
+                        <li>✓ Охорона 24/7</li>
+                        <li>✓ Відеоспостереження</li>
+                        <li>✓ Освітлена територія</li>
+                        <li>✓ Аварійна допомога</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Форма бронирования -->
+    <section id="booking" class="booking">
+        <div class="container">
+            <div class="section-header">
+                <h2>Забронюйте номер</h2>
+                <div class="decorative-line"></div>
+            </div>
+            <div class="booking-form-wrapper fade-in">
+                <form id="bookingForm" class="booking-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="checkIn">Дата заїзду</label>
+                            <input type="date" id="checkIn" name="checkIn" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="checkOut">Дата виїзду</label>
+                            <input type="date" id="checkOut" name="checkOut" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="roomType">Тип номера</label>
+                            <select id="roomType" name="roomType" required>
+                                <option value="">Виберіть тип номера</option>
+                                <option value="standard">Стандартний (1000₴/ніч)</option>
+                                <option value="comfort">Комфорт (1500₴/ніч)</option>
+                                <option value="family">Сімейний (2000₴/ніч)</option>
+                                <option value="luxury">Люкс (2500₴/ніч)</option>
+                                <option value="test">Тест (3500₴/ніч)</option>
+
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="guests">Кількість гостей</label>
+                            <select id="guests" name="guests" required>
+                                <option value="">Виберіть кількість</option>
+                                <option value="1">1 гість</option>
+                                <option value="2">2 гостей</option>
+                                <option value="3">3 гостей</option>
+                                <option value="4">4 гостей</option>
+                                <option value="5+">5+ гостей</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Ваше ім'я</label>
+                            <input type="text" id="name" name="name" placeholder="Іван Іванов" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="phone">Номер телефона</label>
+                            <input type="tel" id="phone" name="phone" placeholder="+380 (XX) XXX-XX-XX" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="notes">Ваші побажання та нотатки (опціонально)</label>
+                            <textarea id="notes" name="notes" rows="6" placeholder="Розповідайте про ваші переваги, алергії чи побажання до номера..."></textarea>
+                            <div class="notes-meta">
+                                <span id="notesCounter">0 / 500 слів</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-large">Забронювати</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Контакты -->
+    <section id="contacts" class="contacts">
+        <div class="container">
+            <div class="section-header">
+                <h2>Контакти та карта</h2>
+                <div class="decorative-line"></div>
+            </div>
+            <div class="contacts-layout">
+                <div class="contacts-info fade-in">
+                    <div class="contact-item">
+                        <span class="contact-icon material-icons">location_on</span>
+                        <div>
+                            <h4>Адреса</h4>
+                            <p>Варшавська, 21<br>Ковель, Волинська область, 45004</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon material-icons">phone</span>
+                        <div>
+                            <h4>Телефон</h4>
+                            <p><a href="tel:+380673614171">+38 (067) 361-41-71</a></p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon material-icons">mail</span>
+                        <div>
+                            <h4>Email</h4>
+                            <p><a href="mailto:info@hotel.com">info@hotel.com</a></p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon material-icons">schedule</span>
+                        <div>
+                            <h4>Час роботи</h4>
+                            <p>Круглодобово<br>Служба підтримки 24/7</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="map-container fade-in">
+                    <a href="https://maps.app.goo.gl/u7yx5z7eQkf12KbG8" target="_blank" style="display: block; border-radius: 10px; overflow: hidden; height: 400px;">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d2619.287439282036!2d24.720170000000002!3d51.19130930845501!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1s%D0%92%D0%B0%D1%80%D1%88%D0%B0%D0%B2%D1%81%D1%8C%D0%BA%D0%B0%2C%2021%2C%20%D0%9A%D0%BE%D0%B2%D0%B5%D0%BB%D1%8C!5e0!3m2!1suk!2suk!4v1687960800000" width="100%" height="400" style="border:none;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Козацька Застава. Усі права захищені.</p>
+            <div class="social-links">
+                <a href="https://www.youtube.com/watch?v=ZH3tTktC5VQ" class="social-link">Facebook</a>
+                <a href="#" class="social-link">Instagram</a>
+                <a href="#" class="social-link">VK</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Модальне вікно номеру -->
+    <div id="roomModal" class="modal room-modal">
+        <div class="modal-content room-modal-content">
+            <button class="modal-close room-modal-close" type="button" aria-label="Закрити">&times;</button>
+            <div class="room-modal-body">
+                <div class="room-modal-gallery" id="roomGallery"></div>
+                <div class="room-modal-info">
+                    <h2 id="roomModalTitle"></h2>
+                    <p class="room-modal-price" id="roomModalPrice"></p>
+                    <p id="roomModalDescription"></p>
+                    <div class="room-modal-section">
+                        <h3>Переваги</h3>
+                        <ul id="roomModalHighlights"></ul>
+                    </div>
+                    <div class="room-modal-section">
+                        <h3>Що включено</h3>
+                        <ul id="roomModalAmenities"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно подтверждения бронирования -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-close">&times;</div>
+            <div class="modal-icon">✓</div>
+            <h2>Бронювання підтверджено!</h2>
+            <p>Дякуємо за ваше бронювання. Ви можете заскріншотити чек.</p>
+            <div class="booking-details" id="bookingDetails"></div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="closeModalBtn" type="button">Закрити</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
