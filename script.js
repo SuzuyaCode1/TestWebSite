@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeRoomModal();
     // try to init Firebase if config provided in index.html
     try { initFirebaseFromConfig(); } catch (e) {}
+    try { initializePriceSync(); } catch (e) { console.warn('Price sync init failed', e); }
     initializeAdminPage();
     setMinDateForForm();
     if (window.emailjs && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'YOUR_EMAILJS_PUBLIC_KEY') {
@@ -78,6 +79,7 @@ const ADMIN_PASSWORD = 'admin';
 const ORDERS_STORAGE_KEY = 'hotelBookingOrders';
 const ADMIN_SESSION_KEY = 'hotelAdminLoggedIn';
 const ROOM_PRICES_KEY = 'hotelRoomPrices';
+const ROOM_PRICES_DOC = 'settings/roomPrices';
 const EMAILJS_SERVICE_ID = 'service_l7epj8l';
 const EMAILJS_TEMPLATE_ID = 'template_lwpqnbb';
 const EMAILJS_PUBLIC_KEY = 'AU_iHT6yya0YW-wuK';
@@ -700,11 +702,86 @@ function saveRoomPrices(prices) {
     localStorage.setItem(ROOM_PRICES_KEY, JSON.stringify(prices));
 }
 
+function saveRoomPricesToFirestore(prices) {
+    if (!window.db || !window.firebase) {
+        return Promise.reject(new Error('Firestore is not initialized'));
+    }
+    return db.collection('settings').doc('roomPrices').set({
+        standard: Number(prices.standard) || 0,
+        comfort: Number(prices.comfort) || 0,
+        luxury: Number(prices.luxury) || 0,
+        family: Number(prices.family) || 0,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+}
+
+function fetchRoomPricesFromFirestore() {
+    if (!window.db || !window.firebase) {
+        return Promise.reject(new Error('Firestore is not initialized'));
+    }
+    return db.collection('settings').doc('roomPrices').get()
+        .then(doc => {
+            if (!doc.exists) {
+                return null;
+            }
+            const remote = doc.data() || {};
+            const newPrices = {
+                standard: Number(remote.standard) || roomPrices.standard,
+                comfort: Number(remote.comfort) || roomPrices.comfort,
+                luxury: Number(remote.luxury) || roomPrices.luxury,
+                family: Number(remote.family) || roomPrices.family
+            };
+            roomPrices = newPrices;
+            saveRoomPrices(newPrices);
+            applyRoomPricesToDOM(newPrices);
+            return newPrices;
+        });
+}
+
+function initializePriceSync() {
+    if (!window.db || !window.firebase) return;
+    fetchRoomPricesFromFirestore().catch(e => console.warn('Could not load prices from Firestore', e));
+    try {
+        if (_priceRealtimeUnsub) _priceRealtimeUnsub();
+        _priceRealtimeUnsub = db.collection('settings').doc('roomPrices').onSnapshot(doc => {
+            if (!doc.exists) return;
+            const remote = doc.data() || {};
+            const newPrices = {
+                standard: Number(remote.standard) || roomPrices.standard,
+                comfort: Number(remote.comfort) || roomPrices.comfort,
+                luxury: Number(remote.luxury) || roomPrices.luxury,
+                family: Number(remote.family) || roomPrices.family
+            };
+            roomPrices = newPrices;
+            saveRoomPrices(newPrices);
+            applyRoomPricesToDOM(newPrices);
+            console.info('Room prices updated from Firestore', newPrices);
+        }, err => {
+            console.warn('Room prices realtime error', err);
+        });
+    } catch (e) {
+        console.warn('initializePriceSync failed', e);
+    }
+}
+
 function applyRoomPricesToDOM(prices) {
+    const labels = {
+        standard: 'Стандартний',
+        comfort: 'Комфорт',
+        luxury: 'Люкс',
+        family: 'Сімейний'
+    };
+
     Object.keys(prices).forEach(key => {
         const el = document.querySelector(`.room-price[data-price-key="${key}"] .price-value`);
         if (el) el.textContent = prices[key];
+
+        const option = document.querySelector(`#roomType option[value="${key}"]`);
+        if (option) {
+            option.textContent = `${labels[key]} (${prices[key]}₴/ніч)`;
+        }
     });
+
     // If a room modal is open, update its price display too
     const roomModal = document.getElementById('roomModal');
     if (roomModal && roomModal.classList.contains('show') && roomModal.dataset.roomKey) {
@@ -745,6 +822,7 @@ function initializeAdminPriceEditor() {
         };
         roomPrices = newPrices;
         saveRoomPrices(newPrices);
+        saveRoomPricesToFirestore(newPrices).catch(() => {});
         applyRoomPricesToDOM(newPrices);
         renderAdminSummary();
         alert('Ціни збережено');
@@ -754,6 +832,7 @@ function initializeAdminPriceEditor() {
         if (!confirm('Скинути ціни до стандартних значень?')) return;
         roomPrices = { standard:1000, comfort:1500, luxury:2500, family:2000};
         saveRoomPrices(roomPrices);
+        saveRoomPricesToFirestore(roomPrices).catch(() => {});
         priceStandard.value = roomPrices.standard;
         priceComfort.value = roomPrices.comfort;
         priceLuxury.value = roomPrices.luxury;
@@ -1097,6 +1176,7 @@ let _adminRealtimeInterval = null;
 let _lastOrdersCount = null;
 let _lastOrderTimestamp = null;
 let _adminRealtimeUnsub = null;
+let _priceRealtimeUnsub = null;
 
 function initializeAdminRealtime() {
     // request desktop notification permission
