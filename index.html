@@ -382,6 +382,24 @@
     </div>
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <!-- Firebase (insert your config below) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script>
+        // Replace values with your Firebase Web App config from the Firebase console
+        // Example:
+        // const FIREBASE_CONFIG = { apiKey: '...', authDomain: '...', projectId: '...', appId: '...' };
+        // Leave placeholders empty to keep localStorage-only behaviour.
+        const FIREBASE_CONFIG = window.FIREBASE_CONFIG || {
+            apiKey: "AIzaSyAifnd6q71TLL_It2mKXDhgal979SQk5Jk",
+            authDomain: "hostel-73b68.firebaseapp.com",
+            projectId: "hostel-73b68",
+            storageBucket: "hostel-73b68.firebasestorage.app",
+            messagingSenderId: "76325245032",
+            appId: "1:76325245032:web:da60c5dfeefdaedc1f2bdd",
+            measurementId: "G-EJRQK309PE"
+        };
+    </script>
     <script src="script.js"></script>
 </body>
 </html>

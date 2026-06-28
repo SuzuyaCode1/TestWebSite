@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeForm();
     initializeModal();
     initializeRoomModal();
+    // try to init Firebase if config provided in index.html
+    try { initFirebaseFromConfig(); } catch (e) {}
     initializeAdminPage();
     setMinDateForForm();
     if (window.emailjs && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'YOUR_EMAILJS_PUBLIC_KEY') {
@@ -89,6 +91,41 @@ let roomPrices = {
 };
 let lastConfirmedBooking = null;
 
+function getPriceValue(roomKey) {
+    if (!roomKey) return '';
+    try {
+        const rp = roomPrices && roomPrices[roomKey];
+        if (typeof rp === 'number' && !Number.isNaN(rp)) return rp;
+        if (typeof rp === 'string' && rp.trim() !== '') {
+            const parsed = Number(String(rp).replace(/[^0-9.-]/g, ''));
+            if (!Number.isNaN(parsed)) return parsed;
+        }
+        const rd = roomData[roomKey] && roomData[roomKey].price;
+        if (rd) {
+            const parsed = Number(String(rd).replace(/[^0-9.-]/g, ''));
+            if (!Number.isNaN(parsed)) return parsed;
+        }
+    } catch (e) {
+        // fallback
+    }
+    return '';
+}
+
+// Initialize Firebase if FIREBASE_CONFIG provided (compat SDK expected in index.html)
+function initFirebaseFromConfig() {
+    try {
+        if (window.firebase && typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG && FIREBASE_CONFIG.projectId) {
+            if (!firebase.apps || !firebase.apps.length) {
+                firebase.initializeApp(FIREBASE_CONFIG);
+            }
+            window.db = firebase.firestore();
+            console.log('Firebase initialized (Firestore available)');
+        }
+    } catch (e) {
+        console.warn('Firebase init failed:', e);
+    }
+}
+
 function initializeRoomModal() {
     const modal = document.getElementById('roomModal');
     const closeButton = document.querySelector('.room-modal-close');
@@ -133,10 +170,14 @@ function showRoomDetails(roomKey) {
     document.getElementById('roomModalTitle').textContent = room.title;
     // store which room is open so price updates can target it
     modal.dataset.roomKey = roomKey;
-    const priceNumber = (roomPrices && roomPrices[roomKey]) ? roomPrices[roomKey] : (room.price || '');
+    const priceNumber = getPriceValue(roomKey);
     const priceEl = document.getElementById('roomModalPrice');
     if (priceEl) {
-        priceEl.innerHTML = `<span class="price-value">${priceNumber}</span>₴ <span>/ ніч</span>`;
+        if (priceNumber !== '') {
+            priceEl.innerHTML = `<span class="price-value">${priceNumber}</span>₴ <span>/ ніч</span>`;
+        } else {
+            priceEl.textContent = room.price || '';
+        }
     }
     document.getElementById('roomModalDescription').textContent = room.description;
     document.getElementById('roomModalHighlights').innerHTML = room.highlights.map((item) => `<li>${item}</li>`).join('');
@@ -429,7 +470,7 @@ function initializeModal() {
     
     // Закрытие при нажатии Escape
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.classList.contains('show')) {
+        if (e.key === 'Escape' && modal && modal.classList.contains('show')) {
             closeModal(modal);
         }
     });
@@ -539,6 +580,10 @@ function sendBookingReceiptEmail(bookingData) {
                     <td style="padding: 8px 0; text-align: right;">${bookingRoomType}</td>
                 </tr>
                 <tr>
+                    <td style="padding: 8px 0; font-weight: 700;">Ціна:</td>
+                    <td style="padding: 8px 0; text-align: right;">${bookingData.priceAtBooking || (roomPrices[bookingData.roomType] || '')}₴</td>
+                </tr>
+                <tr>
                     <td style="padding: 8px 0; font-weight: 700;">Гостей:</td>
                     <td style="padding: 8px 0; text-align: right;">${bookingData.guests}</td>
                 </tr>
@@ -587,7 +632,8 @@ function sendBookingReceiptEmail(bookingData) {
         from_name: EMAILJS_SENDER_NAME,
         reply_to: EMAILJS_REPLY_TO,
         booking_subject: `Чек бронювання: ${bookingRoomType}`,
-        booking_details: `Заїзд: ${bookingData.checkIn}\nВиїзд: ${bookingData.checkOut}\nТип номера: ${bookingRoomType}\nГостей: ${bookingData.guests}\nТелефон: ${bookingData.phone}\nНотатки: ${bookingData.notes || 'Немає'}`,
+        booking_details: `Заїзд: ${bookingData.checkIn}\nВиїзд: ${bookingData.checkOut}\nТип номера: ${bookingRoomType}\nЦіна: ${bookingData.priceAtBooking || (roomPrices[bookingData.roomType] || '')}₴\nГостей: ${bookingData.guests}\nТелефон: ${bookingData.phone}\nНотатки: ${bookingData.notes || 'Немає'}`,
+        booking_price: bookingData.priceAtBooking || (roomPrices[bookingData.roomType] || ''),
         booking_html: bookingHtml
     };
 
@@ -773,20 +819,41 @@ function saveOrders(orders) {
 }
 
 function saveBookingOrder(bookingData) {
+    // Always save locally first for immediate UX
     const orders = loadOrders();
-    orders.push({
+    const localEntry = {
         ...bookingData,
+        id: Date.now().toString(),
         createdAt: new Date().toISOString(),
         status: 'new'
-    });
+    };
+    orders.push(localEntry);
     saveOrders(orders);
+
+    // If Firestore is available, push to shared DB (async)
+    if (window.db && window.firebase) {
+        try {
+            const toSave = Object.assign({}, localEntry);
+            // remove local id and use server timestamp
+            delete toSave.id;
+            toSave.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            db.collection('bookings').add(toSave).then((docRef) => {
+                // optionally set id on doc
+                docRef.update({ id: docRef.id }).catch(() => {});
+            }).catch(err => {
+                console.error('Firestore save failed', err);
+            });
+        } catch (e) {
+            console.error('Firestore save error', e);
+        }
+    }
 }
 
 function renderAdminSummary() {
     const orders = loadOrders();
     const summaryElement = document.getElementById('adminSummary');
     const totalRevenue = orders.reduce((total, order) => {
-        return total + (roomPrices[order.roomType] || 0);
+        return total + (Number(order.priceAtBooking) || Number(roomPrices[order.roomType]) || 0);
     }, 0);
 
     if (!summaryElement) return;
@@ -1028,19 +1095,41 @@ function handleClearOrders() {
 let _adminRealtimeInterval = null;
 let _lastOrdersCount = null;
 let _lastOrderTimestamp = null;
+let _adminRealtimeUnsub = null;
 
 function initializeAdminRealtime() {
-    // set initial state
-    const orders = loadOrders();
-    _lastOrdersCount = orders.length;
-    _lastOrderTimestamp = orders.length ? orders[orders.length - 1].createdAt : null;
-
     // request desktop notification permission
     requestNotificationPermission();
 
+    // If Firestore is available, subscribe to realtime updates
+    if (window.db && window.firebase) {
+        try {
+            if (_adminRealtimeUnsub) _adminRealtimeUnsub();
+            _adminRealtimeUnsub = db.collection('bookings').orderBy('createdAt', 'asc').onSnapshot(snapshot => {
+                const orders = snapshot.docs.map(doc => {
+                    const d = doc.data();
+                    const createdAt = d.createdAt && typeof d.createdAt.toDate === 'function' ? d.createdAt.toDate().toISOString() : (d.createdAt || new Date().toISOString());
+                    return Object.assign({}, d, { id: d.id || doc.id, createdAt });
+                });
+                // save locally for UI reuse
+                saveOrders(orders);
+                _lastOrdersCount = orders.length;
+                _lastOrderTimestamp = orders.length ? orders[orders.length - 1].createdAt : null;
+                renderAdminSummary();
+                renderOrdersTable();
+            }, err => { console.warn('Firestore realtime error', err); });
+            return;
+        } catch (e) {
+            console.warn('Realtime (Firestore) setup failed', e);
+        }
+    }
+
+    // fallback: set initial state using local storage and polling
+    const orders = loadOrders();
+    _lastOrdersCount = orders.length;
+    _lastOrderTimestamp = orders.length ? orders[orders.length - 1].createdAt : null;
     // listen to storage events (fires in other tabs)
     window.addEventListener('storage', handleStorageEvent);
-
     // polling fallback every 5s to detect changes even when storage event not fired
     if (_adminRealtimeInterval) clearInterval(_adminRealtimeInterval);
     _adminRealtimeInterval = setInterval(() => checkForOrderUpdates(), 5000);
@@ -1050,6 +1139,10 @@ function stopAdminRealtime() {
     window.removeEventListener('storage', handleStorageEvent);
     if (_adminRealtimeInterval) clearInterval(_adminRealtimeInterval);
     _adminRealtimeInterval = null;
+    if (_adminRealtimeUnsub) {
+        try { _adminRealtimeUnsub(); } catch (e) {}
+        _adminRealtimeUnsub = null;
+    }
 }
 
 function handleStorageEvent(e) {
@@ -1199,8 +1292,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 pointer-events: none;
             `;
             
-            // Только если это не форма submit - не создаем ripple для submit кнопок
-            if (button.type !== 'submit' || button.className.includes('closeModal')) {
+            // Только если это не форма submit и это не кнопка закрытия модалки
+            if (button.type !== 'submit' && !button.classList.contains('modal-close')) {
                 this.style.position = 'relative';
                 this.style.overflow = 'hidden';
                 this.appendChild(ripple);
