@@ -898,6 +898,19 @@ function saveOrders(orders) {
     localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
 }
 
+function clearFirestoreBookings() {
+    if (!window.db || !window.firebase) {
+        return Promise.reject(new Error('Firestore is not initialized'));
+    }
+    return db.collection('bookings').get()
+        .then(snapshot => {
+            if (snapshot.empty) return Promise.resolve();
+            const batch = db.batch();
+            snapshot.docs.forEach(doc => batch.delete(doc.ref));
+            return batch.commit();
+        });
+}
+
 function saveBookingOrder(bookingData) {
     // Always save locally first for immediate UX
     const orders = loadOrders();
@@ -1167,6 +1180,19 @@ function handleClearOrders() {
     saveOrders([]);
     renderAdminSummary();
     renderOrdersTable();
+
+    if (window.db && window.firebase) {
+        clearFirestoreBookings()
+            .then(() => {
+                console.info('All Firestore bookings deleted');
+                // local cache may already be empty, but re-render to reflect remote data if any
+                renderAdminSummary();
+                renderOrdersTable();
+            })
+            .catch(error => {
+                console.error('Failed to clear Firestore bookings:', error);
+            });
+    }
 }
 
 // ===========================
