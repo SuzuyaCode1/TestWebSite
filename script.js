@@ -804,6 +804,7 @@ function showAdminDashboard() {
     initializeAdminPriceEditor();
     // render list of new bookings
     renderNewBookingsList();
+    console.info('Admin dashboard shown. Firestore available:', !!window.db, 'Firebase object:', !!window.firebase);
 }
 
 function loadOrders() {
@@ -1117,10 +1118,14 @@ function initializeAdminRealtime() {
                 _lastOrderTimestamp = orders.length ? orders[orders.length - 1].createdAt : null;
                 renderAdminSummary();
                 renderOrdersTable();
-            }, err => { console.warn('Firestore realtime error', err); });
+            }, err => {
+                console.warn('Firestore realtime error', err);
+                fetchFirestoreOrders().catch(error => console.error('Firestore fetch fallback failed', error));
+            });
             return;
         } catch (e) {
             console.warn('Realtime (Firestore) setup failed', e);
+            fetchFirestoreOrders().catch(error => console.error('Firestore fetch fallback failed', error));
         }
     }
 
@@ -1143,6 +1148,31 @@ function stopAdminRealtime() {
         try { _adminRealtimeUnsub(); } catch (e) {}
         _adminRealtimeUnsub = null;
     }
+}
+
+function fetchFirestoreOrders() {
+    return new Promise((resolve, reject) => {
+        if (!window.db || !window.firebase) {
+            reject(new Error('Firestore is not initialized'));
+            return;
+        }
+
+        db.collection('bookings').orderBy('createdAt', 'asc').get()
+            .then(snapshot => {
+                const orders = snapshot.docs.map(doc => {
+                    const d = doc.data();
+                    const createdAt = d.createdAt && typeof d.createdAt.toDate === 'function' ? d.createdAt.toDate().toISOString() : (d.createdAt || new Date().toISOString());
+                    return Object.assign({}, d, { id: d.id || doc.id, createdAt });
+                });
+                saveOrders(orders);
+                _lastOrdersCount = orders.length;
+                _lastOrderTimestamp = orders.length ? orders[orders.length - 1].createdAt : null;
+                renderAdminSummary();
+                renderOrdersTable();
+                resolve(orders);
+            })
+            .catch(reject);
+    });
 }
 
 function handleStorageEvent(e) {
